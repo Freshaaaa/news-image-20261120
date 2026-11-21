@@ -115,12 +115,14 @@ def tag(d, x, y, label, bg=GREEN, fg=(255, 255, 255)):
 
 # ---------------------------------------------------------------- banners
 def banner_poland(d, x0, y0, x1, y1):
-    """Polish field at dusk: orange horizon, silhouetted trees, a road with
-    flashing red/blue emergency lights and a rising smoke plume."""
+    """A missile incident in Poland: dusk sky, a Polish flag on a pole, a
+    bright missile trail streaking down to a crater in the field, emergency
+    lights at the scene. No casualties, no close-up destruction."""
     w, h = x1 - x0, y1 - y0
     vgrad(d, [x0, y0, x1, y0 + int(h * 0.62)], (44, 38, 78), (214, 122, 52))
-    # sun low on the horizon
-    d.ellipse([x0 + w - 52, y0 + int(h * 0.30), x0 + w - 20, y0 + int(h * 0.30) + 32],
+    # sun low on the horizon (left of centre, clear of the missile trail)
+    d.ellipse([x0 + int(w * 0.30), y0 + int(h * 0.28),
+               x0 + int(w * 0.30) + 30, y0 + int(h * 0.28) + 30],
               fill=(255, 196, 90))
     # silhouetted tree line
     hy = y0 + int(h * 0.62)
@@ -130,31 +132,46 @@ def banner_poland(d, x0, y0, x1, y1):
                   fill=(28, 24, 40))
     # field
     d.rectangle([x0, hy, x1, y1], fill=(52, 44, 30))
-    # road diagonal
-    d.polygon([(x0 + int(w * 0.42), y1), (x0 + int(w * 0.58), y1),
-               (x0 + int(w * 0.52), hy), (x0 + int(w * 0.46), hy)], fill=(38, 36, 40))
-    d.line([(x0 + int(w * 0.50), y1), (x0 + int(w * 0.49), hy)],
-           fill=(220, 200, 120), width=2)
-    # smoke plume (small, soft grey puffs)
-    for i, (sx, sy, sr) in enumerate([(0.30, 0.34, 9), (0.33, 0.26, 11),
-                                      (0.37, 0.19, 8), (0.40, 0.13, 6)]):
-        d.ellipse([x0 + int(w * sx) - sr, y0 + int(h * sy) - sr,
-                   x0 + int(w * sx) + sr, y0 + int(h * sy) + sr],
-                  fill=(130, 126, 128) if i % 2 == 0 else (148, 144, 146))
-    # emergency lights: red and blue glows with halos
-    for cx, cy, col, halo in [(0.60, 0.78, (255, 60, 50), (255, 120, 110)),
-                              (0.72, 0.80, (70, 130, 255), (130, 170, 255))]:
-        px, py = x0 + int(w * cx), y0 + int(h * cy)
-        d.ellipse([px - 16, py - 16, px + 16, py + 16], fill=halo)
-        d.ellipse([px - 7, py - 7, px + 7, py + 7], fill=col)
-        d.ellipse([px - 3, py - 3, px + 3, py + 3], fill=(255, 255, 255))
+    # Polish flag on a pole at the left: white over red
+    fx = x0 + int(w * 0.07)
+    fy = y0 + int(h * 0.30)
+    d.line([(fx, fy), (fx, y1 - 6)], fill=(60, 52, 44), width=3)
+    fw, fh = 44, 26
+    d.rectangle([fx + 2, fy, fx + 2 + fw, fy + fh // 2], fill=(255, 255, 255))
+    d.rectangle([fx + 2, fy + fh // 2, fx + 2 + fw, fy + fh], fill=(220, 20, 60))
+    d.rectangle([fx + 2, fy, fx + 2 + fw, fy + fh], outline=(90, 20, 40), width=1)
+    # missile trail: bright streak from upper right down to the crater
+    ix = x0 + int(w * 0.66)   # impact x
+    iy = y0 + int(h * 0.80)   # impact y (in the field)
+    tx0, ty0 = x0 + int(w * 0.92), y0 + int(h * 0.06)
+    d.line([(tx0, ty0), (ix, iy)], fill=(255, 190, 120), width=7)
+    d.line([(tx0, ty0), (ix, iy)], fill=(255, 240, 200), width=3)
+    d.line([(tx0, ty0), (ix, iy)], fill=(255, 255, 255), width=1)
+    # missile head: small bright dot at the impact end
+    d.ellipse([ix - 4, iy - 4, ix + 4, iy + 4], fill=(255, 240, 180))
+    # impact crater: dark ellipse with a glowing orange rim
+    d.ellipse([ix - 26, iy - 7, ix + 26, iy + 9], fill=(30, 24, 18))
+    d.arc([ix - 26, iy - 7, ix + 26, iy + 9], start=180, end=360,
+          fill=(255, 140, 50), width=3)
+    # small smoke puffs above the crater
+    for i, (ox, oy, sr) in enumerate([(-4, -16, 7), (3, -26, 8), (-2, -36, 6)]):
+        d.ellipse([ix + ox - sr, iy + oy - sr, ix + ox + sr, iy + oy + sr],
+                  fill=(140, 136, 138) if i % 2 == 0 else (160, 156, 158))
+    # emergency lights: red and blue glows with halos, flanking the crater
+    for cx, col, halo in [(0.30, (70, 130, 255), (130, 170, 255)),
+                          (0.44, (255, 60, 50), (255, 120, 110))]:
+        px, py = x0 + int(w * cx), y0 + int(h * 0.86)
+        d.ellipse([px - 14, py - 14, px + 14, py + 14], fill=halo)
+        d.ellipse([px - 6, py - 6, px + 6, py + 6], fill=col)
+        d.ellipse([px - 2, py - 2, px + 2, py + 2], fill=(255, 255, 255))
 
 
 def banner_kyiv(d, x0, y0, x1, y1):
-    """River bridge at night: dark sky, city lights on both banks, an arched
-    bridge over a dark river, smoke rising with an orange glow at its base."""
+    """River bridge at night, brightened: lighter sky, more city lights on
+    both banks, the arched bridge lit warm so it clearly reads, small light
+    smoke with an orange glow at its base."""
     w, h = x1 - x0, y1 - y0
-    vgrad(d, [x0, y0, x1, y0 + int(h * 0.55)], (10, 14, 34), (52, 44, 78))
+    vgrad(d, [x0, y0, x1, y0 + int(h * 0.55)], (38, 52, 96), (104, 92, 140))
     # stars at fixed positions
     for sx, sy in [(0.06, 0.10), (0.16, 0.22), (0.28, 0.08), (0.44, 0.16),
                    (0.58, 0.06), (0.72, 0.18), (0.86, 0.08), (0.94, 0.24),
@@ -162,38 +179,40 @@ def banner_kyiv(d, x0, y0, x1, y1):
         star(d, x0 + int(w * sx), y0 + int(h * sy), 3, (255, 244, 200))
     # moon
     d.ellipse([x0 + w - 46, y0 + 10, x0 + w - 22, y0 + 34], fill=(240, 232, 200))
-    # city skylines on both banks
+    # city skylines on both banks (lighter, more lit windows)
     hy = y0 + int(h * 0.55)
     for bx, bw, bh in [(0, 26, 34), (28, 18, 46), (48, 30, 28), (80, 20, 40),
                        (w - 100, 24, 38), (w - 74, 18, 50), (w - 54, 28, 30),
                        (w - 24, 22, 42)]:
-        d.rectangle([x0 + bx, hy - bh, x0 + bx + bw, hy], fill=(16, 16, 28))
+        d.rectangle([x0 + bx, hy - bh, x0 + bx + bw, hy], fill=(34, 34, 58))
         for wy in range(hy - bh + 6, hy - 4, 10):
             for wx in range(x0 + bx + 4, x0 + bx + bw - 4, 9):
-                if (wx + wy) % 3 == 0:
+                if (wx + wy) % 2 == 0:
                     d.rectangle([wx, wy, wx + 3, wy + 4], fill=(255, 206, 110))
-    # river
-    d.rectangle([x0, hy, x1, y1], fill=(22, 34, 62))
-    d.line([(x0, hy + 12), (x1, hy + 12)], fill=(90, 120, 170), width=1)
-    d.line([(x0 + 20, hy + 26), (x1 - 30, hy + 26)], fill=(70, 100, 150), width=1)
-    # arched bridge
+    # river (lighter)
+    d.rectangle([x0, hy, x1, y1], fill=(44, 66, 108))
+    d.line([(x0, hy + 12), (x1, hy + 12)], fill=(140, 170, 210), width=1)
+    d.line([(x0 + 20, hy + 26), (x1 - 30, hy + 26)], fill=(120, 150, 200), width=1)
+    # arched bridge, warm-lit so the arch clearly reads
     bx0, bx1 = x0 + int(w * 0.30), x0 + int(w * 0.72)
-    d.arc([bx0, hy - 34, bx1, hy + 26], start=180, end=360, fill=(200, 190, 160), width=4)
-    d.line([(bx0, hy - 4), (bx1, hy - 4)], fill=(200, 190, 160), width=4)
+    d.arc([bx0, hy - 34, bx1, hy + 26], start=180, end=360, fill=(250, 230, 170), width=5)
+    d.line([(bx0, hy - 4), (bx1, hy - 4)], fill=(250, 230, 170), width=5)
     for i in range(9):
         cx = bx0 + int((bx1 - bx0) * i / 8)
         top = hy - 4 - int(30 * math.sin(math.pi * i / 8))
-        d.line([(cx, top), (cx, hy - 4)], fill=(180, 170, 140), width=2)
-    # bridge lights
+        d.line([(cx, top), (cx, hy - 4)], fill=(220, 200, 160), width=2)
+        # warm light on the arch itself
+        d.ellipse([cx - 3, top - 3, cx + 3, top + 3], fill=(255, 220, 130))
+    # bridge deck lights (bigger, brighter)
     for i in range(9):
         cx = bx0 + int((bx1 - bx0) * i / 8)
-        d.ellipse([cx - 2, hy - 8, cx + 2, hy - 4], fill=(255, 220, 130))
-    # smoke plume with orange glow at the base (small, soft puffs)
+        d.ellipse([cx - 3, hy - 9, cx + 3, hy - 3], fill=(255, 224, 140))
+    # smoke plume, smaller and lighter, with orange glow at the base
     sx = x0 + int(w * 0.52)
-    d.ellipse([sx - 11, hy - 18, sx + 11, hy + 2], fill=(255, 140, 50))
-    for i, (ox, oy, sr) in enumerate([(-3, -26, 8), (3, -38, 10), (-2, -50, 7), (4, -60, 5)]):
+    d.ellipse([sx - 9, hy - 14, sx + 9, hy + 2], fill=(255, 150, 60))
+    for i, (ox, oy, sr) in enumerate([(-3, -22, 6), (3, -32, 7), (-2, -42, 5)]):
         d.ellipse([sx + ox - sr, hy + oy - sr, sx + ox + sr, hy + oy + sr],
-                  fill=(118, 114, 120) if i % 2 == 0 else (138, 134, 140))
+                  fill=(150, 146, 152) if i % 2 == 0 else (168, 164, 170))
 
 
 def banner_hague(d, x0, y0, x1, y1):
